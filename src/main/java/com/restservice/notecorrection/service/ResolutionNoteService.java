@@ -40,9 +40,9 @@ public class ResolutionNoteService {
     @Transactional
     public BigDecimal resoudreNote(Integer idMatiere, Integer idCandidat) {
         
-        // 1. Récupérer les paramètres pour cette matière
-        Parametre parametre = parametreRepository.findByMatiereId(idMatiere);
-        if (parametre == null) {
+        // 1. Récupérer TOUS les paramètres pour cette matière
+        List<Parametre> parametres = parametreRepository.findByMatiereId(idMatiere);
+        if (parametres.isEmpty()) {
             throw new RuntimeException("Aucun paramètre trouvé pour la matière ID: " + idMatiere);
         }
         
@@ -53,53 +53,96 @@ public class ResolutionNoteService {
             throw new RuntimeException("Aucune note trouvée pour le candidat " + idCandidat + " en matière " + idMatiere);
         }
         
-        // 3. Calculer l'écart entre les notes
-        BigDecimal ecart = calculerEcart(notes);
+        // 3. Calculer la SOMME des différences entre toutes les paires de notes
+        BigDecimal sommeDifferences = calculerSommeDifferences(notes);
         
-        // 4. Récupérer l'opérateur et le seuil
-        Operateur operateur = parametre.getOperateur();
-        BigDecimal ecartMax = parametre.getEcartMax();
-        
-        // 5. Vérifier si l'écart correspond à la condition
-        boolean conditionRemplie = verifierCondition(ecart, operateur, ecartMax);
+        // 4. Trouver le paramètre qui correspond à cette somme
+        Parametre parametreCorrespondant = trouverParametreCorrespondant(parametres, sommeDifferences);
         
         BigDecimal noteFinale;
         Resolution resolutionUtilisee;
         
-        // 6. Appliquer la résolution appropriée
-        if (conditionRemplie) {
-            // Si la condition est remplie (ex: écart > 2), appliquer la résolution spécifiée
-            noteFinale = appliquerResolution(notes, parametre.getResolution());
-            resolutionUtilisee = parametre.getResolution();
+        // 5. Si un paramètre correspond, appliquer sa résolution
+        if (parametreCorrespondant != null) {
+            noteFinale = appliquerResolution(notes, parametreCorrespondant.getResolution());
+            resolutionUtilisee = parametreCorrespondant.getResolution();
+            System.out.println("Paramètre correspondant trouvé: seuil=" + parametreCorrespondant.getEcartMax() 
+                + ", opérateur=" + parametreCorrespondant.getOperateur().getSymbole()
+                + ", résolution=" + resolutionUtilisee.getLibelleNote());
         } else {
             // Sinon, faire la moyenne des notes
             noteFinale = calculerMoyenne(notes);
             // Récupérer la résolution "Moyenne"
             resolutionUtilisee = resolutionRepository.findByLibelleNoteContainingIgnoreCase("moyenne")
                     .orElseThrow(() -> new RuntimeException("Résolution 'Moyenne' non trouvée"));
+            System.out.println("Aucun paramètre correspondant, utilisation de la moyenne");
         }
         
-        // 7. Sauvegarder la note finale avec l'ID de résolution
+        // 6. Sauvegarder la note finale avec l'ID de résolution
         sauvegarderNoteFinale(idMatiere, idCandidat, noteFinale, resolutionUtilisee);
         
         return noteFinale;
     }
     
     /**
-     * Vérifie si l'écart satisfait la condition avec l'opérateur
+     * Trouve le paramètre qui correspond à la somme des différences
+     * Parcourt tous les paramètres et vérifie si la condition est remplie
      */
-    private boolean verifierCondition(BigDecimal ecart, Operateur operateur, BigDecimal seuil) {
+    private Parametre trouverParametreCorrespondant(List<Parametre> parametres, BigDecimal sommeDifferences) {
+        for (Parametre parametre : parametres) {
+            if (verifierCondition(sommeDifferences, parametre.getOperateur(), parametre.getEcartMax())) {
+                return parametre;
+            }
+        }
+        return null; // Aucun paramètre ne correspond
+    }
+    
+    /**
+     * Récupère tous les paramètres pour une matière
+     */
+    public List<Parametre> getParametresByMatiere(Integer idMatiere) {
+        return parametreRepository.findByMatiereId(idMatiere);
+    }
+    
+    /**
+     * Calcule la SOMME des différences entre toutes les paires de notes
+     */
+    public BigDecimal calculerSommeDifferences(List<Note> notes) {
+        if (notes == null || notes.size() < 2) {
+            return BigDecimal.ZERO;
+        }
+        
+        List<BigDecimal> valeurs = notes.stream()
+                .map(Note::getValeurNote)
+                .collect(Collectors.toList());
+        
+        BigDecimal somme = BigDecimal.ZERO;
+        
+        for (int i = 0; i < valeurs.size(); i++) {
+            for (int j = i + 1; j < valeurs.size(); j++) {
+                BigDecimal diff = valeurs.get(i).subtract(valeurs.get(j)).abs();
+                somme = somme.add(diff);
+            }
+        }
+        
+        return somme;
+    }
+    
+    /**
+     * Vérifie si la valeur satisfait la condition avec l'opérateur
+     */
+    public boolean verifierCondition(BigDecimal valeur, Operateur operateur, BigDecimal seuil) {
         switch (operateur.getSymbole()) {
             case ">":
-                return ecart.compareTo(seuil) > 0;
+                return valeur.compareTo(seuil) > 0;
             case ">=":
-                return ecart.compareTo(seuil) >= 0;
+                return valeur.compareTo(seuil) >= 0;
             case "<":
-                return ecart.compareTo(seuil) < 0;
+                return valeur.compareTo(seuil) < 0;
             case "<=":
-                return ecart.compareTo(seuil) <= 0;
+                return valeur.compareTo(seuil) <= 0;
             case "=":
-                return ecart.compareTo(seuil) == 0;
+                return valeur.compareTo(seuil) == 0;
             default:
                 return false;
         }
@@ -133,43 +176,11 @@ public class ResolutionNoteService {
     }
     
     /**
-     * Calcule l'écart entre les notes (max - min)
+     * Vérifie si la somme des différences correspond à un paramètre
      */
-    public BigDecimal calculerEcart(List<Note> notes) {
-        if (notes == null || notes.size() < 2) {
-            return BigDecimal.ZERO;
-        }
-        
-        BigDecimal min = notes.stream()
-                .map(Note::getValeurNote)
-                .min(BigDecimal::compareTo)
-                .orElse(BigDecimal.ZERO);
-        
-        BigDecimal max = notes.stream()
-                .map(Note::getValeurNote)
-                .max(BigDecimal::compareTo)
-                .orElse(BigDecimal.ZERO);
-        
-        return max.subtract(min);
-    }
-    
-    /**
-     * Récupère les paramètres pour une matière
-     */
-    public Parametre getParametreByMatiere(Integer idMatiere) {
-        return parametreRepository.findByMatiereId(idMatiere);
-    }
-    
-    /**
-     * Vérifie si l'écart dépasse le seuil selon les paramètres
-     */
-    public boolean verifierEcartAvecParametre(List<Note> notes, Parametre parametre) {
-        if (notes.size() < 2 || parametre == null) {
-            return false;
-        }
-        
-        BigDecimal ecart = calculerEcart(notes);
-        return verifierCondition(ecart, parametre.getOperateur(), parametre.getEcartMax());
+    public Parametre trouverParametrePourSomme(Integer idMatiere, BigDecimal sommeDifferences) {
+        List<Parametre> parametres = parametreRepository.findByMatiereId(idMatiere);
+        return trouverParametreCorrespondant(parametres, sommeDifferences);
     }
     
     /**
@@ -249,29 +260,5 @@ public class ResolutionNoteService {
         } else {
             return valeurs.get(taille / 2); // Médiane
         }
-    }
-    
-    /**
-     * Calcule la somme des différences entre toutes les paires de notes
-     * (utile pour certains cas particuliers)
-     */
-    public BigDecimal calculerSommeDifferences(List<Note> notes) {
-        if (notes.size() < 2) {
-            return BigDecimal.ZERO;
-        }
-        
-        List<BigDecimal> valeurs = notes.stream()
-                .map(Note::getValeurNote)
-                .collect(Collectors.toList());
-        
-        BigDecimal somme = BigDecimal.ZERO;
-        for (int i = 0; i < valeurs.size(); i++) {
-            for (int j = i + 1; j < valeurs.size(); j++) {
-                BigDecimal diff = valeurs.get(i).subtract(valeurs.get(j)).abs();
-                somme = somme.add(diff);
-            }
-        }
-        
-        return somme;
     }
 }

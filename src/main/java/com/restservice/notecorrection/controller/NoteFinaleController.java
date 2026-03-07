@@ -44,6 +44,7 @@ public class NoteFinaleController {
     
     /**
      * Traite la recherche et affiche le résultat
+     * MAINTENANT: TOUJOURS recalculer pour être à jour
      */
     @PostMapping("/resultat")
     public ModelAndView getNoteFinale(@RequestParam("idCandidat") Integer idCandidat,
@@ -65,20 +66,19 @@ public class NoteFinaleController {
             // 1. Récupérer toutes les notes brutes pour affichage
             List<Note> notesBrutes = noteService.getNotesByMatiereAndCandidat(idMatiere, idCandidat);
             
-            // 2. Vérifier si une note finale existe déjà
-            NoteFinale noteFinale = noteFinaleService.getNoteFinale(idMatiere, idCandidat);
-            
-            // 3. Si pas de note finale mais qu'il y a des notes brutes, la calculer automatiquement
-            if (noteFinale == null && !notesBrutes.isEmpty()) {
+            // 2. TOUJOURS recalculer la note finale (pour être sûr d'avoir la dernière version)
+            if (!notesBrutes.isEmpty()) {
                 try {
+                    System.out.println("🔄 Recalcul forcé de la note finale pour matière " + idMatiere + ", candidat " + idCandidat);
                     BigDecimal noteCalculee = resolutionNoteService.resoudreNote(idMatiere, idCandidat);
-                    // Recharger la note finale après calcul
-                    noteFinale = noteFinaleService.getNoteFinale(idMatiere, idCandidat);
-                    modelAndView.addObject("autoCalculMessage", "Note finale calculée automatiquement");
+                    modelAndView.addObject("recalculMessage", "Note finale recalculée: " + noteCalculee);
                 } catch (Exception e) {
-                    modelAndView.addObject("errorMessage", "Erreur lors du calcul automatique: " + e.getMessage());
+                    modelAndView.addObject("errorMessage", "Erreur lors du calcul: " + e.getMessage());
                 }
             }
+            
+            // 3. Récupérer la note finale (qui vient d'être recalculée)
+            NoteFinale noteFinale = noteFinaleService.getNoteFinale(idMatiere, idCandidat);
             
             // 4. Récupérer TOUS les paramètres de résolution pour cette matière
             String parametreInfo = "";

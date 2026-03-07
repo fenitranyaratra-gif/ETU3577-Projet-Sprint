@@ -1,128 +1,119 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="/WEB-INF/views/layout/header.jsp" %>
 <%@ page import="java.util.List, com.restservice.notecorrection.entity.Matiere, com.restservice.notecorrection.entity.Operateur, com.restservice.notecorrection.entity.Resolution" %>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${titre}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="${pageContext.request.contextPath}/">Gestion Notes</a>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="${pageContext.request.contextPath}/candidats/liste">Candidats</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="${pageContext.request.contextPath}/parametres/liste">Paramètres</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="${pageContext.request.contextPath}/notes/liste">Notes</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
 
-    <div class="container mt-4">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">${titre}</h4>
-                    </div>
-                    <div class="card-body">
+<div class="container-fluid py-5">
+    <div class="row">
+        <div class="col-lg-12">
+            
+            <div class="mb-5">
+                <h2 class="fw-bold text-dark mb-1">${titre}</h2>
+                <p class="text-muted">Configurez les règles de correction et les seuils de tolérance par matière.</p>
+            </div>
+
+            <div class="card border-0 shadow-sm p-4" style="border-radius: 24px;">
+                <div class="card-body">
+                    
+                    <%-- Alertes d'erreurs --%>
+                    <%
+                        String errorMessage = (String) request.getAttribute("errorMessage");
+                        if (errorMessage != null) {
+                    %>
+                        <div class="alert alert-danger border-0 small mb-4" style="border-radius: 12px; background-color: #fff5f5; color: #e53e3e;">
+                            <i class="bi bi-exclamation-triangle me-2"></i> <%= errorMessage %>
+                        </div>
+                    <% } %>
+
+                    <form action="${pageContext.request.contextPath}/parametres/ajouter" method="post">
                         
-                        <%-- Affichage des erreurs --%>
-                        <%
-                            String errorMessage = (String) request.getAttribute("errorMessage");
-                            if (errorMessage != null) {
-                        %>
-                            <div class="alert alert-danger" role="alert">
-                                <%= errorMessage %>
+                        <div class="row">
+                            <div class="col-md-6 border-end-md pe-md-4">
+                                <div class="mb-4">
+                                    <label for="matiereId" class="form-label text-secondary small fw-bold text-uppercase" style="letter-spacing: 0.5px;">Matière *</label>
+                                    <select class="form-select form-select-lg border-light bg-light" id="matiereId" name="matiere.id" required style="border-radius: 12px; font-size: 0.95rem;">
+                                        <option value="">Sélectionnez la matière cible</option>
+                                        <%
+                                            List<Matiere> matieres = (List<Matiere>) request.getAttribute("matieres");
+                                            if (matieres != null) {
+                                                for (Matiere m : matieres) {
+                                        %>
+                                            <option value="<%= m.getId() %>"><%= m.getNom() %> (Coefficient: <%= m.getCoefficient() %>)</option>
+                                        <%
+                                                }
+                                            }
+                                        %>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="ecartMax" class="form-label text-secondary small fw-bold text-uppercase" style="letter-spacing: 0.5px;">Diff</label>
+                                    <div class="input-group">
+                                        <input type="number" step="0.01" min="0.01" class="form-control form-control-lg border-light bg-light" 
+                                               id="ecartMax" name="ecartMax" placeholder="0.00" required
+                                               style="border-top-left-radius: 12px; border-bottom-left-radius: 12px; font-size: 0.95rem;">
+                                        <span class="input-group-text border-light bg-light text-muted" style="border-top-right-radius: 12px; border-bottom-right-radius: 12px;">points</span>
+                                    </div>
+                                </div>
                             </div>
-                        <% } %>
+
+                            <div class="col-md-6 ps-md-4">
+                                <div class="mb-4">
+                                    <label for="operateurId" class="form-label text-secondary small fw-bold text-uppercase" style="letter-spacing: 0.5px;">Opérateur de comparaison *</label>
+                                    <select class="form-select form-select-lg border-light bg-light" id="operateurId" name="operateur.id" required style="border-radius: 12px; font-size: 0.95rem;">
+                                        <option value="">Operateurr</option>
+                                        <%
+                                            List<Operateur> operateurs = (List<Operateur>) request.getAttribute("operateurs");
+                                            if (operateurs != null) {
+                                                for (Operateur o : operateurs) {
+                                        %>
+                                            <option value="<%= o.getId() %>"><%= o.getSymbole() %></option>
+                                        <%
+                                                }
+                                            }
+                                        %>
+                                    </select>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="resolutionId" class="form-label text-secondary small fw-bold text-uppercase" style="letter-spacing: 0.5px;">Mode de résolution *</label>
+                                    <select class="form-select form-select-lg border-light bg-light" id="resolutionId" name="resolution.id" required style="border-radius: 12px; font-size: 0.95rem;">
+                                        <option value="">Resolutionn an </option>
+                                        <%
+                                            List<Resolution> resolutions = (List<Resolution>) request.getAttribute("resolutions");
+                                            if (resolutions != null) {
+                                                for (Resolution r : resolutions) {
+                                        %>
+                                            <option value="<%= r.getId() %>"><%= r.getLibelleNote() %></option>
+                                        <%
+                                                }
+                                            }
+                                        %>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-5 opacity-25">
                         
-                        <form action="${pageContext.request.contextPath}/parametres/ajouter" method="post">
-                            <div class="mb-3">
-                                <label for="matiereId" class="form-label">Matière *</label>
-                                <select class="form-control" id="matiereId" name="matiere.id" required>
-                                    <option value="">Sélectionnez une matière</option>
-                                    <%
-                                        List<Matiere> matieres = (List<Matiere>) request.getAttribute("matieres");
-                                        if (matieres != null) {
-                                            for (Matiere m : matieres) {
-                                    %>
-                                        <option value="<%= m.getId() %>"><%= m.getNom() %> (Coef: <%= m.getCoefficient() %>)</option>
-                                    <%
-                                            }
-                                        }
-                                    %>
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="ecartMax" class="form-label">Écart Maximum *</label>
-                                <input type="number" step="0.01" min="0.01" class="form-control" 
-                                       id="ecartMax" name="ecartMax" required>
-                                <small class="text-muted">La différence maximale autorisée entre deux notes</small>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="operateurId" class="form-label">Opérateur *</label>
-                                <select class="form-control" id="operateurId" name="operateur.id" required>
-                                    <option value="">Sélectionnez un opérateur</option>
-                                    <%
-                                        List<Operateur> operateurs = (List<Operateur>) request.getAttribute("operateurs");
-                                        if (operateurs != null) {
-                                            for (Operateur o : operateurs) {
-                                    %>
-                                        <option value="<%= o.getId() %>"><%= o.getSymbole() %></option>
-                                    <%
-                                            }
-                                        }
-                                    %>
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="resolutionId" class="form-label">Résolution *</label>
-                                <select class="form-control" id="resolutionId" name="resolution.id" required>
-                                    <option value="">Sélectionnez une résolution</option>
-                                    <%
-                                        List<Resolution> resolutions = (List<Resolution>) request.getAttribute("resolutions");
-                                        if (resolutions != null) {
-                                            for (Resolution r : resolutions) {
-                                    %>
-                                        <option value="<%= r.getId() %>"><%= r.getLibelleNote() %></option>
-                                    <%
-                                            }
-                                        }
-                                    %>
-                                </select>
-                            </div>
-                            
-                            <div class="d-flex justify-content-between">
-                                <a href="${pageContext.request.contextPath}/parametres/liste" class="btn btn-secondary">
-                                    <i class="bi bi-arrow-left"></i> Annuler
-                                </a>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-save"></i> Enregistrer
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="${pageContext.request.contextPath}/parametres/liste" class="text-secondary text-decoration-none small">
+                                <i class="bi bi-chevron-left"></i> Retour à la liste
+                            </a>
+                            <div class="d-flex gap-3">
+                                <button type="reset" class="btn btn-light px-4" style="border-radius: 12px; font-weight: 600;">Réinitialiser</button>
+                                <button type="submit" class="btn btn-primary px-5 shadow-sm" style="border-radius: 12px; font-weight: 600; background: #5a67d8; border: none;">
+                                    <i class="bi bi-cloud-check me-2"></i> Enregistrer la configuration
                                 </button>
                             </div>
-                        </form>
-                    </div>
+                        </div>
+
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -35,80 +35,154 @@ public class ResolutionNoteService {
     
     /**
      * Résout la note finale pour un candidat et une matière donnés
-     * en appliquant les paramètres de résolution configurés
      */
     @Transactional
     public BigDecimal resoudreNote(Integer idMatiere, Integer idCandidat) {
         
-        // 1. Récupérer TOUS les paramètres pour cette matière
-        List<Parametre> parametres = parametreRepository.findByMatiereId(idMatiere);
-        if (parametres.isEmpty()) {
-            throw new RuntimeException("Aucun paramètre trouvé pour la matière ID: " + idMatiere);
-        }
+        System.out.println("\n========== DÉBUT RÉSOLUTION ==========");
+        System.out.println("Matière ID: " + idMatiere + ", Candidat ID: " + idCandidat);
         
-        // 2. Récupérer toutes les notes pour ce candidat et cette matière
+        // 1. Récupérer toutes les notes pour ce candidat et cette matière
         List<Note> notes = noteRepository.findNotesByMatiereAndCandidat(idMatiere, idCandidat);
+        System.out.println("Nombre de notes trouvées: " + notes.size());
         
         if (notes.isEmpty()) {
             throw new RuntimeException("Aucune note trouvée pour le candidat " + idCandidat + " en matière " + idMatiere);
         }
         
-        // 3. Calculer la SOMME des différences entre toutes les paires de notes
-        BigDecimal sommeDifferences = calculerSommeDifferences(notes);
-        
-        // 4. Trouver le paramètre qui correspond à cette somme
-        Parametre parametreCorrespondant = trouverParametreCorrespondant(parametres, sommeDifferences);
+        // Afficher les notes
+        for (int i = 0; i < notes.size(); i++) {
+            System.out.println("Note " + (i+1) + ": " + notes.get(i).getValeurNote() + 
+                              " (Correcteur: " + notes.get(i).getCorrecteur().getNom() + ")");
+        }
         
         BigDecimal noteFinale;
         Resolution resolutionUtilisee;
         
-        // 5. Si un paramètre correspond, appliquer sa résolution
-        if (parametreCorrespondant != null) {
-            noteFinale = appliquerResolution(notes, parametreCorrespondant.getResolution());
-            resolutionUtilisee = parametreCorrespondant.getResolution();
-            System.out.println("Paramètre correspondant trouvé: seuil=" + parametreCorrespondant.getEcartMax() 
-                + ", opérateur=" + parametreCorrespondant.getOperateur().getSymbole()
-                + ", résolution=" + resolutionUtilisee.getLibelleNote());
+        // 2. CAS SPÉCIAL: Une seule note
+        if (notes.size() == 1) {
+            noteFinale = notes.get(0).getValeurNote();
+            System.out.println("✅ CAS SPÉCIAL: Une seule note = " + noteFinale);
+            
+            // Chercher une résolution "Note unique" ou prendre "Moyenne" par défaut
+            resolutionUtilisee = resolutionRepository.findByLibelleNoteContainingIgnoreCase("unique")
+                    .orElseGet(() -> {
+                        System.out.println("⚠️ Résolution 'unique' non trouvée, utilisation de 'moyenne'");
+                        return resolutionRepository.findByLibelleNoteContainingIgnoreCase("moyenne")
+                                .orElse(null);
+                    });
+            
+            if (resolutionUtilisee == null) {
+                // Si vraiment aucune résolution trouvée, en créer une temporaire
+                System.out.println("⚠️ Aucune résolution trouvée, création d'une résolution par défaut");
+                Resolution defaultRes = new Resolution();
+                defaultRes.setLibelleNote("Note unique");
+                resolutionUtilisee = defaultRes;
+            }
+            
         } else {
-            // Sinon, faire la moyenne des notes
-            noteFinale = calculerMoyenne(notes);
-            // Récupérer la résolution "Moyenne"
-            resolutionUtilisee = resolutionRepository.findByLibelleNoteContainingIgnoreCase("moyenne")
-                    .orElseThrow(() -> new RuntimeException("Résolution 'Moyenne' non trouvée"));
-            System.out.println("Aucun paramètre correspondant, utilisation de la moyenne");
+            // 3. CAS NORMAL: Plusieurs notes
+            System.out.println("📊 CAS NORMAL: " + notes.size() + " notes");
+            
+            // Récupérer TOUS les paramètres pour cette matière
+            List<Parametre> parametres = parametreRepository.findByMatiereId(idMatiere);
+            System.out.println("Nombre de paramètres trouvés: " + parametres.size());
+            
+            if (parametres.isEmpty()) {
+                throw new RuntimeException("Aucun paramètre trouvé pour la matière ID: " + idMatiere);
+            }
+            
+            // Afficher les paramètres
+            for (Parametre p : parametres) {
+                System.out.println("Paramètre: seuil=" + p.getEcartMax() + 
+                                 ", opérateur=" + p.getOperateur().getSymbole() + 
+                                 ", résolution=" + p.getResolution().getLibelleNote());
+            }
+            
+            // Calculer la SOMME des différences
+            BigDecimal sommeDifferences = calculerSommeDifferences(notes);
+            System.out.println("Somme des différences calculée: " + sommeDifferences);
+            
+            // Tester chaque paramètre
+            Parametre parametreCorrespondant = null;
+            for (Parametre p : parametres) {
+                boolean condition = verifierCondition(sommeDifferences, p.getOperateur(), p.getEcartMax());
+                System.out.println("Test: " + sommeDifferences + " " + p.getOperateur().getSymbole() + " " + p.getEcartMax() + " = " + condition);
+                if (condition) {
+                    parametreCorrespondant = p;
+                    System.out.println("✅ CORRESPONDANCE: " + p.getResolution().getLibelleNote());
+                    break;
+                }
+            }
+            
+            if (parametreCorrespondant != null) {
+                noteFinale = appliquerResolution(notes, parametreCorrespondant.getResolution());
+                resolutionUtilisee = parametreCorrespondant.getResolution();
+                System.out.println("✅ Résolution appliquée: " + resolutionUtilisee.getLibelleNote() + " -> " + noteFinale);
+            } else {
+                noteFinale = calculerMoyenne(notes);
+                resolutionUtilisee = resolutionRepository.findByLibelleNoteContainingIgnoreCase("moyenne")
+                        .orElseThrow(() -> new RuntimeException("Résolution 'Moyenne' non trouvée"));
+                System.out.println("❌ Aucune correspondance, moyenne -> " + noteFinale);
+            }
         }
         
-        // 6. Sauvegarder la note finale avec l'ID de résolution
-        sauvegarderNoteFinale(idMatiere, idCandidat, noteFinale, resolutionUtilisee);
+        // 4. AVANT SUPPRESSION: Vérifier si une note finale existe
+        Optional<NoteFinale> ancienneNote = noteFinaleRepository.findByMatiereIdAndCandidatId(idMatiere, idCandidat);
+        if (ancienneNote.isPresent()) {
+            System.out.println("🗑️ Ancienne note finale trouvée: ID=" + ancienneNote.get().getId() + 
+                             ", valeur=" + ancienneNote.get().getValeurNoteFinale() + 
+                             ", résolution=" + ancienneNote.get().getResolutionUtilisee().getLibelleNote());
+            
+            // Supprimer
+            noteFinaleRepository.delete(ancienneNote.get());
+            noteFinaleRepository.flush();
+            System.out.println("✅ Ancienne note finale supprimée");
+        } else {
+            System.out.println("ℹ️ Aucune ancienne note finale trouvée");
+        }
+        
+        // 5. Sauvegarder la NOUVELLE note finale
+        NoteFinale nouvelleNote = sauvegarderNoteFinale(idMatiere, idCandidat, noteFinale, resolutionUtilisee);
+        System.out.println("✅ Nouvelle note finale sauvegardée: ID=" + nouvelleNote.getId() + 
+                          ", valeur=" + nouvelleNote.getValeurNoteFinale() + 
+                          ", résolution=" + nouvelleNote.getResolutionUtilisee().getLibelleNote());
+        
+        System.out.println("========== FIN RÉSOLUTION ==========\n");
         
         return noteFinale;
     }
     
     /**
-     * Trouve le paramètre qui correspond à la somme des différences
-     * Parcourt tous les paramètres et vérifie si la condition est remplie
+     * Sauvegarde la note finale
      */
-    private Parametre trouverParametreCorrespondant(List<Parametre> parametres, BigDecimal sommeDifferences) {
-        for (Parametre parametre : parametres) {
-            if (verifierCondition(sommeDifferences, parametre.getOperateur(), parametre.getEcartMax())) {
-                return parametre;
-            }
-        }
-        return null; // Aucun paramètre ne correspond
+    @Transactional
+    public NoteFinale sauvegarderNoteFinale(Integer idMatiere, Integer idCandidat, 
+                                           BigDecimal note, Resolution resolution) {
+        
+        Matiere matiere = matiereRepository.findById(idMatiere)
+                .orElseThrow(() -> new RuntimeException("Matière non trouvée avec ID: " + idMatiere));
+        
+        Candidat candidat = candidatRepository.findById(idCandidat)
+                .orElseThrow(() -> new RuntimeException("Candidat non trouvé avec ID: " + idCandidat));
+        
+        NoteFinale noteFinale = new NoteFinale();
+        noteFinale.setMatiere(matiere);
+        noteFinale.setCandidat(candidat);
+        noteFinale.setValeurNoteFinale(note);
+        noteFinale.setResolutionUtilisee(resolution);
+        noteFinale.setDateCalcul(LocalDateTime.now());
+        
+        return noteFinaleRepository.save(noteFinale);
     }
     
     /**
-     * Récupère tous les paramètres pour une matière
-     */
-    public List<Parametre> getParametresByMatiere(Integer idMatiere) {
-        return parametreRepository.findByMatiereId(idMatiere);
-    }
-    
-    /**
-     * Calcule la SOMME des différences entre toutes les paires de notes
+     * Calcule la SOMME des différences
      */
     public BigDecimal calculerSommeDifferences(List<Note> notes) {
         if (notes == null || notes.size() < 2) {
+            System.out.println("⚠️ calculerSommeDifferences: pas assez de notes (" + 
+                             (notes == null ? 0 : notes.size()) + ")");
             return BigDecimal.ZERO;
         }
         
@@ -129,79 +203,53 @@ public class ResolutionNoteService {
     }
     
     /**
-     * Vérifie si la valeur satisfait la condition avec l'opérateur
+     * Vérifie la condition
      */
     public boolean verifierCondition(BigDecimal valeur, Operateur operateur, BigDecimal seuil) {
+        if (valeur == null || operateur == null || seuil == null) {
+            return false;
+        }
+        
+        int comparison = valeur.compareTo(seuil);
+        
         switch (operateur.getSymbole()) {
-            case ">":
-                return valeur.compareTo(seuil) > 0;
-            case ">=":
-                return valeur.compareTo(seuil) >= 0;
-            case "<":
-                return valeur.compareTo(seuil) < 0;
-            case "<=":
-                return valeur.compareTo(seuil) <= 0;
-            case "=":
-                return valeur.compareTo(seuil) == 0;
-            default:
-                return false;
+            case ">": return comparison > 0;
+            case ">=": return comparison >= 0;
+            case "<": return comparison < 0;
+            case "<=": return comparison <= 0;
+            case "=": return comparison == 0;
+            default: return false;
         }
     }
     
     /**
-     * Sauvegarde la note finale avec la résolution utilisée
+     * Récupère tous les paramètres
      */
-    @Transactional
-    public NoteFinale sauvegarderNoteFinale(Integer idMatiere, Integer idCandidat, 
-                                           BigDecimal note, Resolution resolution) {
-        
-        Matiere matiere = matiereRepository.findById(idMatiere)
-                .orElseThrow(() -> new RuntimeException("Matière non trouvée"));
-        
-        Candidat candidat = candidatRepository.findById(idCandidat)
-                .orElseThrow(() -> new RuntimeException("Candidat non trouvé"));
-        
-        // Vérifier si une note finale existe déjà
-        NoteFinale noteFinale = noteFinaleRepository
-                .findByMatiereIdAndCandidatId(idMatiere, idCandidat)
-                .orElse(new NoteFinale());
-        
-        noteFinale.setMatiere(matiere);
-        noteFinale.setCandidat(candidat);
-        noteFinale.setValeurNoteFinale(note);
-        noteFinale.setResolutionUtilisee(resolution);
-        noteFinale.setDateCalcul(LocalDateTime.now());
-        
-        return noteFinaleRepository.save(noteFinale);
+    public List<Parametre> getParametresByMatiere(Integer idMatiere) {
+        return parametreRepository.findByMatiereId(idMatiere);
     }
     
     /**
-     * Vérifie si la somme des différences correspond à un paramètre
+     * Trouve le paramètre pour une somme
      */
     public Parametre trouverParametrePourSomme(Integer idMatiere, BigDecimal sommeDifferences) {
         List<Parametre> parametres = parametreRepository.findByMatiereId(idMatiere);
-        return trouverParametreCorrespondant(parametres, sommeDifferences);
+        for (Parametre parametre : parametres) {
+            if (verifierCondition(sommeDifferences, parametre.getOperateur(), parametre.getEcartMax())) {
+                return parametre;
+            }
+        }
+        return null;
     }
     
     /**
-     * Récupère les notes brutes avec détails des correcteurs
-     */
-    public List<Map<String, Object>> getNotesAvecDetails(Integer idMatiere, Integer idCandidat) {
-        List<Note> notes = noteRepository.findNotesByMatiereAndCandidat(idMatiere, idCandidat);
-        
-        return notes.stream().map(note -> {
-            Map<String, Object> detail = new HashMap<>();
-            detail.put("id", note.getId());
-            detail.put("valeur", note.getValeurNote());
-            detail.put("correcteur", note.getCorrecteur().getNom() + " " + note.getCorrecteur().getPrenom());
-            return detail;
-        }).collect(Collectors.toList());
-    }
-    
-    /**
-     * Applique la résolution spécifiée sur la liste des notes
+     * Applique la résolution
      */
     private BigDecimal appliquerResolution(List<Note> notes, Resolution resolution) {
+        if (notes == null || notes.isEmpty() || resolution == null) {
+            return BigDecimal.ZERO;
+        }
+        
         List<BigDecimal> valeurs = notes.stream()
                 .map(Note::getValeurNote)
                 .collect(Collectors.toList());
@@ -209,56 +257,26 @@ public class ResolutionNoteService {
         String libelle = resolution.getLibelleNote().toLowerCase();
         
         if (libelle.contains("plus petit") || libelle.contains("min") || libelle.contains("petite")) {
-            // Note la plus petite
             return valeurs.stream().min(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
-            
         } else if (libelle.contains("plus grand") || libelle.contains("max") || libelle.contains("grand")) {
-            // Note la plus grande
             return valeurs.stream().max(BigDecimal::compareTo).orElse(BigDecimal.ZERO);
-            
-        } else if (libelle.contains("moyenne") || libelle.contains("arithm")) {
-            // Moyenne arithmétique
-            return calculerMoyenne(notes);
-            
-        } else if (libelle.contains("troisième") || libelle.contains("3") || libelle.contains("troisieme")) {
-            // Troisième correction
-            return appliquerTroisiemeCorrection(notes);
-            
         } else {
-            // Par défaut, moyenne
             return calculerMoyenne(notes);
         }
     }
     
     /**
-     * Calcule la moyenne des notes
+     * Calcule la moyenne
      */
     private BigDecimal calculerMoyenne(List<Note> notes) {
+        if (notes == null || notes.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        
         BigDecimal somme = notes.stream()
                 .map(Note::getValeurNote)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         
         return somme.divide(BigDecimal.valueOf(notes.size()), 2, RoundingMode.HALF_UP);
-    }
-    
-    /**
-     * Applique la troisième correction
-     */
-    private BigDecimal appliquerTroisiemeCorrection(List<Note> notes) {
-        List<BigDecimal> valeurs = notes.stream()
-                .map(Note::getValeurNote)
-                .sorted()
-                .collect(Collectors.toList());
-        
-        int taille = valeurs.size();
-        
-        if (taille == 1) {
-            return valeurs.get(0);
-        } else if (taille == 2) {
-            return valeurs.get(0).add(valeurs.get(1))
-                    .divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP);
-        } else {
-            return valeurs.get(taille / 2); // Médiane
-        }
     }
 }

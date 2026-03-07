@@ -101,3 +101,9 @@ INSERT INTO Note (id_matiere, id_candidat, id_correcteur, valeur_note) VALUES
 (1, 1, 1, 12.5),  -- Math, Rakoto, Dupont: 12.5
 (1, 1, 2, 15.0),  -- Math, Rakoto, Curie: 15.0
 (1, 1, 3, 10.0);  -- Math, Rakoto, Arbitre: 10.0 (écart = 5 > 2, donc on prend la plus petite: 10.0)
+
+INSERT INTO Parametre (id_matiere, ecart_max, id_operateur, id_resolution) VALUES 
+(1, 2.00, 2, 2);
+INSERT INTO Note (id_matiere, id_candidat, id_correcteur, valeur_note) VALUES 
+(1, 2, 1, 14),  -- Math, Rakoto, Dupont: 12.5
+(1, 2, 2, 15.0);  -- Math, Rakoto, Curie: 15.0

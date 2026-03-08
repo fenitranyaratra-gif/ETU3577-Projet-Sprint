@@ -25,9 +25,7 @@ public class NoteFinaleService {
     @Autowired
     private ResolutionRepository resolutionRepository;
     
-    /**
-     * Sauvegarde ou met à jour une note finale
-     */
+
     @Transactional
     public NoteFinale sauvegarderNoteFinale(Integer idMatiere, Integer idCandidat, 
                                            BigDecimal note, Integer idResolution) {
@@ -41,7 +39,6 @@ public class NoteFinaleService {
         Resolution resolution = resolutionRepository.findById(idResolution)
                 .orElseThrow(() -> new RuntimeException("Résolution non trouvée avec ID: " + idResolution));
         
-        // Vérifier si une note finale existe déjà pour ce couple (matière, candidat)
         NoteFinale noteFinale = noteFinaleRepository
                 .findByMatiereIdAndCandidatId(idMatiere, idCandidat)
                 .orElse(new NoteFinale());
@@ -55,56 +52,38 @@ public class NoteFinaleService {
         return noteFinaleRepository.save(noteFinale);
     }
     
-    /**
-     * Sauvegarde ou met à jour une note finale (version avec objet Resolution)
-     */
+
     @Transactional
     public NoteFinale sauvegarderNoteFinale(Integer idMatiere, Integer idCandidat, 
                                            BigDecimal note, Resolution resolution) {
         return sauvegarderNoteFinale(idMatiere, idCandidat, note, resolution.getId());
     }
-    
-    /**
-     * Récupère une note finale par matière et candidat
-     */
+
     public NoteFinale getNoteFinale(Integer idMatiere, Integer idCandidat) {
         return noteFinaleRepository
                 .findByMatiereIdAndCandidatId(idMatiere, idCandidat)
                 .orElse(null);
     }
-    
-    /**
-     * Récupère toutes les notes finales pour une matière
-     */
+
     public List<NoteFinale> getNotesFinalesParMatiere(Integer idMatiere) {
         return noteFinaleRepository.findByMatiereId(idMatiere);
     }
-    
-    /**
-     * Récupère toutes les notes finales pour un candidat
-     */
+
     public List<NoteFinale> getNotesFinalesParCandidat(Integer idCandidat) {
         return noteFinaleRepository.findByCandidatId(idCandidat);
     }
     
-    /**
-     * Récupère toutes les notes finales
-     */
+
     public List<NoteFinale> getAllNotesFinales() {
         return noteFinaleRepository.findAll();
     }
-    
-    /**
-     * Supprime une note finale
-     */
+
     @Transactional
     public void deleteNoteFinale(Integer id) {
         noteFinaleRepository.deleteById(id);
     }
     
-    /**
-     * Supprime une note finale par matière et candidat
-     */
+
     @Transactional
     public void deleteNoteFinale(Integer idMatiere, Integer idCandidat) {
         NoteFinale noteFinale = getNoteFinale(idMatiere, idCandidat);
@@ -113,16 +92,12 @@ public class NoteFinaleService {
         }
     }
     
-    /**
-     * Vérifie si une note finale existe
-     */
+
     public boolean existeNoteFinale(Integer idMatiere, Integer idCandidat) {
         return noteFinaleRepository.findByMatiereIdAndCandidatId(idMatiere, idCandidat).isPresent();
     }
     
-    /**
-     * Calcule la moyenne des notes finales d'un candidat (toutes matières confondues)
-     */
+
     public BigDecimal calculerMoyenneGeneraleCandidat(Integer idCandidat) {
         List<NoteFinale> notes = getNotesFinalesParCandidat(idCandidat);
         
@@ -148,9 +123,7 @@ public class NoteFinaleService {
         return somme.divide(BigDecimal.valueOf(totalCoeff), 2, java.math.RoundingMode.HALF_UP);
     }
     
-    /**
-     * Récupère les statistiques des notes finales pour une matière
-     */
+
     public java.util.Map<String, Object> getStatistiquesMatiere(Integer idMatiere) {
         List<NoteFinale> notes = getNotesFinalesParMatiere(idMatiere);
         

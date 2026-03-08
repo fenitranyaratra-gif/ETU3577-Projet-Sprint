@@ -29,10 +29,7 @@ public class NoteFinaleController {
     
     @Autowired
     private NoteService noteService;
-    
-    /**
-     * Affiche le formulaire de recherche de note finale
-     */
+
     @GetMapping("/rechercher")
     public ModelAndView showRechercheForm() {
         ModelAndView modelAndView = new ModelAndView("notefinale/rechercher");
@@ -42,10 +39,7 @@ public class NoteFinaleController {
         return modelAndView;
     }
     
-    /**
-     * Traite la recherche et affiche le résultat
-     * MAINTENANT: TOUJOURS recalculer pour être à jour
-     */
+
     @PostMapping("/resultat")
     public ModelAndView getNoteFinale(@RequestParam("idCandidat") Integer idCandidat,
                                       @RequestParam("idMatiere") Integer idMatiere,
@@ -54,7 +48,6 @@ public class NoteFinaleController {
         ModelAndView modelAndView = new ModelAndView("notefinale/resultat");
         
         try {
-            // Récupérer les informations du candidat et de la matière
             Candidat candidat = candidatService.getCandidatById(idCandidat);
             Matiere matiere = matiereService.getMatiereById(idMatiere);
             
@@ -63,24 +56,17 @@ public class NoteFinaleController {
                 return new ModelAndView("redirect:/notefinale/rechercher");
             }
             
-            // 1. Récupérer toutes les notes brutes pour affichage
             List<Note> notesBrutes = noteService.getNotesByMatiereAndCandidat(idMatiere, idCandidat);
             
-            // 2. TOUJOURS recalculer la note finale (pour être sûr d'avoir la dernière version)
             if (!notesBrutes.isEmpty()) {
                 try {
-                    System.out.println("🔄 Recalcul forcé de la note finale pour matière " + idMatiere + ", candidat " + idCandidat);
                     BigDecimal noteCalculee = resolutionNoteService.resoudreNote(idMatiere, idCandidat);
                     modelAndView.addObject("recalculMessage", "Note finale recalculée: " + noteCalculee);
                 } catch (Exception e) {
                     modelAndView.addObject("errorMessage", "Erreur lors du calcul: " + e.getMessage());
                 }
             }
-            
-            // 3. Récupérer la note finale (qui vient d'être recalculée)
             NoteFinale noteFinale = noteFinaleService.getNoteFinale(idMatiere, idCandidat);
-            
-            // 4. Récupérer TOUS les paramètres de résolution pour cette matière
             String parametreInfo = "";
             BigDecimal sommeDifferences = null;
             Parametre parametreCorrespondant = null;
@@ -89,16 +75,11 @@ public class NoteFinaleController {
             try {
                 List<Parametre> parametres = resolutionNoteService.getParametresByMatiere(idMatiere);
                 if (!parametres.isEmpty() && !notesBrutes.isEmpty()) {
-                    // Calculer la SOMME des différences
                     sommeDifferences = resolutionNoteService.calculerSommeDifferences(notesBrutes);
-                    
-                    // Trouver le paramètre correspondant
                     parametreCorrespondant = resolutionNoteService.trouverParametrePourSomme(idMatiere, sommeDifferences);
                     
-                    // Générer les détails du calcul pour affichage
                     detailsCalcul = genererDetailsCalcul(notesBrutes);
                     
-                    // Construire l'info de tous les paramètres
                     StringBuilder sb = new StringBuilder();
                     sb.append("Paramètres disponibles:<br>");
                     for (Parametre p : parametres) {
@@ -141,9 +122,7 @@ public class NoteFinaleController {
         return modelAndView;
     }
     
-    /**
-     * Génère les détails du calcul de la somme des différences
-     */
+
     private String genererDetailsCalcul(List<Note> notes) {
         if (notes.size() < 2) {
             return "Pas assez de notes pour calculer les différences";
@@ -172,22 +151,18 @@ public class NoteFinaleController {
         return details.toString();
     }
     
-    /**
-     * Calcule (ou recalcule) la note finale et l'affiche
-     */
+
     @PostMapping("/calculer")
     public ModelAndView calculerNoteFinale(@RequestParam("idCandidat") Integer idCandidat,
                                           @RequestParam("idMatiere") Integer idMatiere,
                                           RedirectAttributes redirectAttributes) {
         
         try {
-            // Appeler le service de résolution qui calcule et sauvegarde la note finale
             BigDecimal noteCalculee = resolutionNoteService.resoudreNote(idMatiere, idCandidat);
             
             redirectAttributes.addFlashAttribute("successMessage", 
                 "Note finale calculée avec succès: " + noteCalculee);
             
-            // Rediriger vers la page de résultat avec les paramètres
             return new ModelAndView("redirect:/notefinale/resultat?idCandidat=" + idCandidat + 
                                    "&idMatiere=" + idMatiere);
             
@@ -198,9 +173,7 @@ public class NoteFinaleController {
         }
     }
     
-    /**
-     * Affiche toutes les notes finales (pour un candidat ou une matière)
-     */
+
     @GetMapping("/liste")
     public ModelAndView listeNotesFinales(@RequestParam(value = "idCandidat", required = false) Integer idCandidat,
                                          @RequestParam(value = "idMatiere", required = false) Integer idMatiere) {
@@ -229,9 +202,7 @@ public class NoteFinaleController {
         return modelAndView;
     }
     
-    /**
-     * API pour obtenir les détails du calcul (format JSON)
-     */
+
     @GetMapping("/api/details/{idMatiere}/{idCandidat}")
     @ResponseBody
     public java.util.Map<String, Object> getDetailsCalcul(@PathVariable Integer idMatiere, 
@@ -247,7 +218,6 @@ public class NoteFinaleController {
                 return result;
             }
             
-            // Calculer la somme des différences
             BigDecimal sommeDifferences = resolutionNoteService.calculerSommeDifferences(notes);
             
             result.put("notes", notes.stream()
@@ -255,7 +225,6 @@ public class NoteFinaleController {
                 .collect(java.util.stream.Collectors.toList()));
             result.put("sommeDifferences", sommeDifferences);
             
-            // Ajouter tous les paramètres
             if (!parametres.isEmpty()) {
                 List<java.util.Map<String, Object>> paramsList = new java.util.ArrayList<>();
                 for (Parametre p : parametres) {
@@ -273,7 +242,6 @@ public class NoteFinaleController {
                 }
                 result.put("parametres", paramsList);
                 
-                // Trouver le paramètre correspondant
                 Parametre correspondant = resolutionNoteService.trouverParametrePourSomme(idMatiere, sommeDifferences);
                 if (correspondant != null) {
                     result.put("parametreCorrespondantId", correspondant.getId());

@@ -1,3 +1,3 @@
 git add .
-git commit -m "[iinitialisation][modification] controller Note"
+git commit -m "[initialisation][modification] amelioration"
 git push origin double-note

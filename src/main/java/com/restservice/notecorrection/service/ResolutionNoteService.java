@@ -48,10 +48,19 @@ public class ResolutionNoteService {
         
         if (notes.size() == 1) {
             noteFinale = notes.get(0).getValeurNote();
-            Resolution defaultRes = new Resolution();
-            defaultRes.setLibelleNote("Note unique");
-            resolutionUtilisee = defaultRes;
-        } else {
+            
+            resolutionUtilisee = resolutionRepository.findByLibelleNoteContainingIgnoreCase("unique")
+                    .orElseGet(() -> {
+                        return resolutionRepository.findByLibelleNoteContainingIgnoreCase("moyenne")
+                                .orElse(null);
+                    });        
+            if (resolutionUtilisee == null) {
+                Resolution defaultRes = new Resolution();
+                defaultRes.setLibelleNote("Note unique");
+                resolutionUtilisee = defaultRes;
+            }
+            
+        }  else {
             List<Parametre> parametres = parametreRepository.findByMatiereId(idMatiere);            
             if (parametres.isEmpty()) {
                 throw new RuntimeException("Aucun paramètre trouvé pour la matière ID: " + idMatiere);

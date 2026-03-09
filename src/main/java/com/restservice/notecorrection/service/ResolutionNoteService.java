@@ -121,7 +121,7 @@ public class ResolutionNoteService {
         if (notes == null || notes.size() < 2) {
             return BigDecimal.ZERO;
         }
-        
+          
         List<BigDecimal> valeurs = notes.stream()
                 .map(Note::getValeurNote)
                 .collect(Collectors.toList());

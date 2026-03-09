@@ -66,65 +66,40 @@ CREATE TABLE note_finale (
 
 INSERT INTO Resolution (libelleNote) VALUES 
 ('plus petit'),
-('moyenne'),
-('plus grand');
+('plus grand'),
+('moyenne');
 
-INSERT INTO Matiere (nom, coeff) VALUES ('Mathématiques', 5), ('Physique', 4),('Chimie', 3);
+INSERT INTO Matiere (nom, coeff) VALUES ('JAVA', 1), ('PHP', 1);
 
 INSERT INTO candidat (nom, prenom) VALUES 
-('CANDIDAT 1', 'Anna'),
-('CANDIDAT 2', 'Anna'),
-('CANDIDAT 3', 'Anna');
+('CANDIDAT 1', 'Cd1'),
+('CANDIDAT 2', 'Cd2');
 -- Insertion des correcteurs
 INSERT INTO Correcteur (nom, prenom) VALUES 
-('Prof.', 'CORRECTEUR 1'), 
-('Prof.', 'CORRECTEUR 2'), 
-('Prof.', 'CORRECTEUR 3'), 
-('Prof.', 'CORRECTEUR 4'), 
-('Prof.', 'CORRECTEUR 5'), 
-('Prof.', 'CORRECTEUR 6');
+('1', 'CORRECTEUR 1'), 
+('2', 'CORRECTEUR 2'), 
+('3', 'CORRECTEUR 3');
 
-INSERT INTO Operateur (symbole) VALUES ('<'), ('>'),('=');
+INSERT INTO Operateur (symbole) VALUES ('<'),('<='), ('>'),('>=');
 
 -- INSERT INTO Parametre (id_matiere, ecart_max, id_operateur, id_resolution) VALUES 
 -- (1, 2.00, 1, 1);  -- Math: si écart > 2, prendre note la plus petite (id_resolution=1)
 
 INSERT INTO Note (id_matiere, id_candidat, id_correcteur, valeur_note) VALUES 
-(1,1,1,10.5),
+(1,1,1,8),
 (1,1,2,9),
-(1,1,3,13),
-(2,1,4,12),
-(2,1,5,12),
-(2,1,6,12),
-(3,1,1,17),
-(3,1,2,9),
-(3,1,3,14),
-
-(1,2,4,8),
-(1,2,5,11),
-(1,2,6,9),
+(1,1,3,10),
+(2,1,1,13),
+(2,1,2,12.5),
+(2,1,3,8.5),
+(1,2,1,9.5),
+(1,2,2,10),
+(1,2,3,10),
 (2,2,1,10),
-(2,2,2,12),
-(2,2,3,11),
-(3,2,4,13),
-(3,2,5,12),
-(3,2,6,14),
-
-(1,3,1,15),
-(1,3,2,14),
-(1,3,3,16),
-(2,3,4,9),
-(2,3,5,10),
-(2,3,6,11),
-(3,3,1,18),
-(3,3,2,17),
-(3,3,3,16);
-
+(2,2,3,18);
 
 INSERT INTO parametre (id_matiere, ecart_max, id_operateur, id_resolution) VALUES 
-(1, 8, 1, 1),
-(1, 7, 2, 2),
-(2, 6, 1, 1),
-(2, 3, 2, 2),
-(3, 12, 1, 1),
-(3, 10, 2, 2);
+(1, 4, 4, 2),
+(1, 2, 1, 1),
+(2, 10, 2, 3),
+(2, 11, 3, 2);

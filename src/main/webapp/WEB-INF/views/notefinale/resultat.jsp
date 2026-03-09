@@ -51,7 +51,7 @@
     <table class="table table-bordered align-middle">
         <thead class="table-light">
             <tr>
-                <th colspan="2" class="py-2 text-uppercase small fw-bold text-secondary">Résultat de la consolidation</th>
+                <th colspan="2" class="py-2 text-uppercase small fw-bold text-secondary">Résultat </th>
             </tr>
         </thead>
         <tbody>

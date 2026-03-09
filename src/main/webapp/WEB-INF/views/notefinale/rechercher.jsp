@@ -41,7 +41,7 @@
                                     if (matieres != null) {
                                         for (Matiere m : matieres) {
                                 %>
-                                    <option value="<%= m.getId() %>"><%= m.getNom() %></option>
+                                    <option value="<%= m.getId() %>"><%= m.getId() %>-<%= m.getNom() %></option>
                                 <%
                                         }
                                     }

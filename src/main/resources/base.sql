@@ -57,40 +57,74 @@ CREATE TABLE note_finale (
 );
 
 
-INSERT INTO Matiere (nom, coeff) VALUES ('Mathématiques', 5), ('Physique-Chimie', 4);
-INSERT INTO Candidat (nom, prenom) VALUES ('Rakoto', 'Antsa');
-INSERT INTO Correcteur (nom) VALUES ('Jean Dupont'), ('Marie Curie'), ('Expert Arbitre');
-INSERT INTO Operateur (symbole) VALUES ('>'), ('<');
+-- INSERT INTO Matiere (nom, coeff) VALUES ('Mathématiques', 5), ('Physique-Chimie', 4);
+-- INSERT INTO Candidat (nom, prenom) VALUES ('Rakoto', 'Antsa');
+-- INSERT INTO Correcteur (nom) VALUES ('Jean Dupont'), ('Marie Curie'), ('Expert Arbitre');
+-- INSERT INTO Operateur (symbole) VALUES ('>'), ('<');
 
-INSERT INTO Resolution (libelleNote) VALUES ('plus petit'), ('moyenne'), ('plus grand');
+-- INSERT INTO Resolution (libelleNote) VALUES ('plus petit'), ('moyenne'), ('plus grand');
 
 INSERT INTO Resolution (libelleNote) VALUES 
 ('plus petit'),
-('plus grand'),
-('moyenne');
+('moyenne'),
+('plus grand');
 
-INSERT INTO Matiere (nom, coeff) VALUES ('Mathématiques', 5), ('Physique-Chimie', 4);
+INSERT INTO Matiere (nom, coeff) VALUES ('Mathématiques', 5), ('Physique', 4),('Chimie', 3);
 
-\INSERT INTO Candidat (nom, prenom) VALUES ('Rakoto', 'Anna'), ('Rabe', 'Jean');
-
+INSERT INTO candidat (nom, prenom) VALUES 
+('CANDIDAT 1', 'Anna'),
+('CANDIDAT 2', 'Anna'),
+('CANDIDAT 3', 'Anna');
 -- Insertion des correcteurs
 INSERT INTO Correcteur (nom, prenom) VALUES 
-('Jean', 'Dupont'), 
-('Marie', 'Curie'), 
-('Expert', 'Arbitre');
+('Prof.', 'CORRECTEUR 1'), 
+('Prof.', 'CORRECTEUR 2'), 
+('Prof.', 'CORRECTEUR 3'), 
+('Prof.', 'CORRECTEUR 4'), 
+('Prof.', 'CORRECTEUR 5'), 
+('Prof.', 'CORRECTEUR 6');
 
-INSERT INTO Operateur (symbole) VALUES ('>'), ('<');
+INSERT INTO Operateur (symbole) VALUES ('<'), ('>'),('=');
 
-INSERT INTO Parametre (id_matiere, ecart_max, id_operateur, id_resolution) VALUES 
-(1, 2.00, 1, 1);  -- Math: si écart > 2, prendre note la plus petite (id_resolution=1)
+-- INSERT INTO Parametre (id_matiere, ecart_max, id_operateur, id_resolution) VALUES 
+-- (1, 2.00, 1, 1);  -- Math: si écart > 2, prendre note la plus petite (id_resolution=1)
 
 INSERT INTO Note (id_matiere, id_candidat, id_correcteur, valeur_note) VALUES 
-(1, 1, 1, 12.5),  -- Math, Rakoto, Dupont: 12.5
-(1, 1, 2, 15.0),  -- Math, Rakoto, Curie: 15.0
-(1, 1, 3, 10.0);  -- Math, Rakoto, Arbitre: 10.0 (écart = 5 > 2, donc on prend la plus petite: 10.0)
+(1,1,1,10.5),
+(1,1,2,9),
+(1,1,3,13),
+(2,1,4,12),
+(2,1,5,12),
+(2,1,6,12),
+(3,1,1,17),
+(3,1,2,9),
+(3,1,3,14),
 
-INSERT INTO Parametre (id_matiere, ecart_max, id_operateur, id_resolution) VALUES 
-(1, 2.00, 2, 2);
-INSERT INTO Note (id_matiere, id_candidat, id_correcteur, valeur_note) VALUES 
-(1, 2, 1, 14),  -- Math, Rakoto, Dupont: 12.5
-(1, 2, 2, 15.0);  -- Math, Rakoto, Curie: 15.0
+(1,2,4,8),
+(1,2,5,11),
+(1,2,6,9),
+(2,2,1,10),
+(2,2,2,12),
+(2,2,3,11),
+(3,2,4,13),
+(3,2,5,12),
+(3,2,6,14),
+
+(1,3,1,15),
+(1,3,2,14),
+(1,3,3,16),
+(2,3,4,9),
+(2,3,5,10),
+(2,3,6,11),
+(3,3,1,18),
+(3,3,2,17),
+(3,3,3,16);
+
+
+INSERT INTO parametre (id_matiere, ecart_max, id_operateur, id_resolution) VALUES 
+(1, 8, 1, 1),
+(1, 7, 2, 2),
+(2, 6, 1, 1),
+(2, 3, 2, 2),
+(3, 12, 1, 1),
+(3, 10, 2, 2);

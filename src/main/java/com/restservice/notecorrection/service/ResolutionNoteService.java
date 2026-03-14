@@ -33,6 +33,8 @@ public class ResolutionNoteService {
     @Autowired
     private CandidatRepository candidatRepository;
 
+    @Autowired
+    private ParametreService parametreService;
     @Transactional
     public BigDecimal resoudreNote(Integer idMatiere, Integer idCandidat) {
         
@@ -66,18 +68,21 @@ public class ResolutionNoteService {
                 throw new RuntimeException("Aucun paramètre trouvé pour la matière ID: " + idMatiere);
             }
             BigDecimal sommeDifferences = calculerSommeDifferences(notes);
-            Parametre parametreCorrespondant = null;
+            List<Parametre> parametreCorrespondant = new ArrayList<>();  
             for (Parametre p : parametres) {
                 boolean condition = verifierCondition(sommeDifferences, p.getOperateur(), p.getEcartMax());
                 if (condition) {
-                    parametreCorrespondant = p;
-                    break;
+                    parametreCorrespondant.add(p);
                 }
             }
-            if (parametreCorrespondant != null) {
-                noteFinale = appliquerResolution(notes, parametreCorrespondant.getResolution());
-                resolutionUtilisee = parametreCorrespondant.getResolution();
-            } else {
+            if (parametreCorrespondant.size() == 1) {
+                noteFinale = appliquerResolution(notes, parametreCorrespondant.get(0).getResolution());
+                resolutionUtilisee = parametreCorrespondant.get(0).getResolution();
+            }else if(parametreCorrespondant.size() > 1){
+                Parametre pMety = parametreService.getParametreMety(parametres, sommeDifferences);
+                noteFinale = appliquerResolution(notes, pMety.getResolution());
+                resolutionUtilisee = pMety.getResolution();
+            }else {
                 noteFinale = calculerMoyenne(notes);
                 resolutionUtilisee = resolutionRepository.findByLibelleNoteContainingIgnoreCase("moyenne")
                         .orElseThrow(() -> new RuntimeException("Résolution 'Moyenne' non trouvée"));

@@ -69,8 +69,9 @@ CREATE TABLE note_finale (
 INSERT INTO Matiere (nom, coeff) VALUES ('JAVA', 1), ('PHP', 1);
 
 INSERT INTO candidat (nom, prenom) VALUES 
-('CANDIDAT 1', 'Cd1'),
-('CANDIDAT 2', 'Cd2');
+('CANDIDAT 1', '1'),
+('CANDIDAT 2', '2'),
+('CANDIDAT 3', '3');
 INSERT INTO Correcteur (nom, prenom) VALUES 
 ('1', 'CORRECTEUR 1'), 
 ('2', 'CORRECTEUR 2'), 
@@ -89,14 +90,24 @@ INSERT INTO Note (id_matiere, id_candidat, id_correcteur, valeur_note) VALUES
 (2,1,1,10),
 (2,1,2,16);
 INSERT INTO Note (id_matiere, id_candidat, id_correcteur, valeur_note) VALUES 
-(1,2,1,9),
-(1,2,2,8),
-(1,2,3,11),
-(2,2,1,13),
+(1,2,1,10),
+(1,2,2,17.5),
+(2,2,1,14),
 (2,2,2,11);
-
+INSERT INTO Note (id_matiere, id_candidat, id_correcteur, valeur_note) VALUES 
+(1,3,1,10),
+(1,3,2,10.5),
+(2,3,1,14),
+(2,3,2,11);
 INSERT INTO parametre (id_matiere, ecart_max, id_operateur, id_resolution) VALUES 
-(1, 14, 1, 2), 
-(1, 7,4, 3), 
-(2, 2, 3, 1),
-(2, 10, 1, 2);
+(1, 3, 3, 1), 
+(1, 3,2, 3), 
+(1, 2, 1, 2),
+(1, 5, 3, 1),
+(1, 10, 4, 2);
+INSERT INTO parametre (id_matiere, ecart_max, id_operateur, id_resolution) VALUES 
+(2, 3, 3, 1), 
+(2, 3,2, 3), 
+(2, 2, 1, 2),
+(2, 5, 3, 1),
+(2, 10, 4, 2);

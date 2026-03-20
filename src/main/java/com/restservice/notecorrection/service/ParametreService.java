@@ -66,4 +66,28 @@ public class ParametreService {
     public Resolution getResolutionById(Integer id) {
         return resolutionRepository.findById(id).orElse(null);
     }
+    public Parametre getParametreMety(List<Parametre> parametres, BigDecimal sommeDifferences) {
+        if (parametres == null || parametres.isEmpty()) {
+            return null; 
+        }
+
+        Parametre gagnant = null;
+        BigDecimal plusPetitEcart = null;
+
+        for (Parametre parametre : parametres) {
+            BigDecimal ecartActuel = parametre.getEcartMax().subtract(sommeDifferences).abs();
+
+            if (plusPetitEcart == null || ecartActuel.compareTo(plusPetitEcart) < 0) {
+                plusPetitEcart = ecartActuel;
+                gagnant = parametre;
+            } 
+            else if (ecartActuel.compareTo(plusPetitEcart) == 0) {
+                if (parametre.getEcartMax().compareTo(gagnant.getEcartMax()) < 0) {
+                    gagnant = parametre;
+                }
+            }
+        }
+
+        return gagnant;
+    }
 }

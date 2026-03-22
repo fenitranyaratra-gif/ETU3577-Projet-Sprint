@@ -1,6 +1,8 @@
 package sprint.forage.entity;
 
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -78,4 +80,13 @@ public class Devis {
     public void setDetailsDevis(List<DetailsDevis> detailsDevis) {
         this.detailsDevis = detailsDevis;
     }
+    public BigDecimal getMontantTotalDdevis() {
+    BigDecimal result = BigDecimal.ZERO;
+    for (DetailsDevis d : detailsDevis) {
+        if (d.getMontant() != null) {
+            result = result.add(d.getMontant());
+        }
+    }
+    return result;
+}
 }

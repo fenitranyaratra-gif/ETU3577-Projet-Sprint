@@ -74,3 +74,14 @@ INSERT INTO Status (libelle) VALUES
 INSERT INTO TypeDevis (libelle) VALUES 
 ('Etude'),
 ('Forage');
+-- 1. Insertion d'un Devis (lié au TypeDevis 1 et à la Demande 1)
+INSERT INTO Devis (idTypeDevis, date, idDemande) 
+VALUES (1, CURRENT_DATE, 2);
+
+-- 2. Insertion des détails pour ce Devis
+-- On utilise CURRVAL pour récupérer l'ID du dernier devis inséré (idDevis)
+INSERT INTO DetailsDevis (idDevis, libelle, montant) VALUES 
+(currval('devis_iddevis_seq'), 'Installation de la pompe', 1500.00),
+(currval('devis_iddevis_seq'), 'Tuyauterie PVC 100m', 850.50),
+(currval('devis_iddevis_seq'), 'Main d''œuvre forage', 2200.00),
+(currval('devis_iddevis_seq'), 'Filtres et accessoires', 320.75);

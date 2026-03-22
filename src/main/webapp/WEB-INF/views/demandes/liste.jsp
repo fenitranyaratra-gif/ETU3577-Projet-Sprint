@@ -38,7 +38,6 @@
                             <td class="text-secondary"><%= demande.getDistrict() %></td>
                             <td class="text-secondary"><%= demande.getDate() %></td>
                             <td class="text-center">
-                                <a href="/demandes/details/<%= demande.getIdDemande() %>" class="btn btn-sm btn-info">Détails</a>
                                 <a href="/demandes/modifier/<%= demande.getIdDemande() %>" class="btn btn-sm btn-warning">Modifier</a>
                                 <a href="/demandes/supprimer/<%= demande.getIdDemande() %>" class="btn btn-sm btn-danger" onclick="return confirm('Supprimer cette demande ?')">Supprimer</a>
                             </td>

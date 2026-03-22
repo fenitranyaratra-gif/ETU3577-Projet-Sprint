@@ -21,6 +21,7 @@
                         <th class="py-3 text-muted fw-semibold">Demande</th>
                         <th class="py-3 text-muted fw-semibold">Type Devis</th>
                         <th class="py-3 text-muted fw-semibold">Date</th>
+                        <th class="py-3 text-muted fw-semibold">Montant</th>
                         <th class="py-3 text-muted fw-semibold text-center">Actions</th>
                     </tr>
                 </thead>
@@ -35,8 +36,8 @@
                             <td class="text-secondary">Demande N°<%= d.getDemande().getIdDemande() %></td>
                             <td class="text-secondary"><%= d.getTypeDevis().getLibelle() %></td>
                             <td class="text-secondary"><%= d.getDate() %></td>
+                            <td class="text-secondary"><%= d.getMontantTotalDdevis() %></td>
                             <td class="text-center">
-                                <a href="/devis/details/<%= d.getIdDevis() %>" class="btn btn-sm btn-info">Détails</a>
                                 <a href="/devis/modifier/<%= d.getIdDevis() %>" class="btn btn-sm btn-warning">Modifier</a>
                                 <a href="/devis/supprimer/<%= d.getIdDevis() %>" class="btn btn-sm btn-danger" onclick="return confirm('Supprimer ce devis ?')">Supprimer</a>
                             </td>

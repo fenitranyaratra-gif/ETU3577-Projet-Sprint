@@ -114,6 +114,18 @@
             padding: 0.75rem 1.5rem;
             font-weight: 600;
         }
+        
+        /* Icône styling amélioré */
+        .nav-link i {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+        
+        .nav-link:hover i {
+            transform: translateX(3px);
+        }
     </style>
 </head>
 <body>
@@ -121,28 +133,32 @@
         <div class="sidebar-brand">
             <i class="bi bi-intersect"></i> ETU3577
         </div>
-        <ul class="navbar-nav">
-    <li class="nav-item">
-        <a class="nav-link" href="/">Dashboard</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="/clients/liste">Clients</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="/demandes/liste">Demandes</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="/demandes/statuts">Statuts des demandes</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="/devis/liste">Devis</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="/types-devis/liste">Types Devis</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="/status/liste">Statuts</a>
-    </li>
-</ul>
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a class="nav-link" href="/clients/liste">
+                    <i class="bi bi-people"></i> Clients
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/demandes/liste">
+                    <i class="bi bi-file-text"></i> Demandes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/demandes/statuts">
+                    <i class="bi bi-pie-chart"></i> Statuts des demandes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/devis/liste">
+                    <i class="bi bi-receipt"></i> Devis
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/status/liste">
+                    <i class="bi bi-toggle-on"></i> Statuts
+                </a>
+            </li>
+        </ul>
     </div>
     <div class="main-content">

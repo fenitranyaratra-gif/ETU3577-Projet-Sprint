@@ -41,7 +41,6 @@ public class ClientController {
     public ModelAndView addClient(@ModelAttribute Client client,
                                  RedirectAttributes redirectAttributes) {
         
-        // Validation du contact
         if (client.getContact() == null || client.getContact().trim().isEmpty()) {
             ModelAndView modelAndView = new ModelAndView("clients/ajouter");
             modelAndView.addObject("client", client);
@@ -50,7 +49,6 @@ public class ClientController {
             return modelAndView;
         }
         
-        // Vérification de l'existence du contact
         if (clientService.existsByContact(client.getContact())) {
             ModelAndView modelAndView = new ModelAndView("clients/ajouter");
             modelAndView.addObject("client", client);
@@ -59,7 +57,6 @@ public class ClientController {
             return modelAndView;
         }
         
-        // Validation du nom
         if (client.getNom() == null || client.getNom().trim().isEmpty()) {
             ModelAndView modelAndView = new ModelAndView("clients/ajouter");
             modelAndView.addObject("client", client);
@@ -104,7 +101,6 @@ public class ClientController {
             return new ModelAndView("redirect:/clients/liste");
         }
         
-        // Validation
         if (client.getNom() == null || client.getNom().trim().isEmpty()) {
             ModelAndView modelAndView = new ModelAndView("clients/modifier");
             modelAndView.addObject("client", existingClient);
@@ -121,15 +117,6 @@ public class ClientController {
             return modelAndView;
         }
         
-        // Vérifier si le contact est déjà utilisé par un autre client
-        if (!existingClient.getContact().equals(client.getContact()) && 
-            clientService.existsByContact(client.getContact())) {
-            ModelAndView modelAndView = new ModelAndView("clients/modifier");
-            modelAndView.addObject("client", existingClient);
-            modelAndView.addObject("titre", "Modifier le Client");
-            modelAndView.addObject("errorMessage", "Ce contact est déjà utilisé par un autre client !");
-            return modelAndView;
-        }
         
         existingClient.setNom(client.getNom());
         existingClient.setContact(client.getContact());

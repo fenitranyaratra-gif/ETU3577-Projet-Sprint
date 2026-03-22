@@ -93,15 +93,12 @@ public class DemandeController {
         }
         
         try {
-            // Créer l'objet Demande
             Demande demande = new Demande();
             demande.setLieu(lieu);
             demande.setAdresse(adresse);
             demande.setDistrict(district);
             
-            logger.info("Tentative de création de la demande...");
             demandeService.createDemande(demande, clientId);
-            logger.info("Demande créée avec succès");
             
             redirectAttributes.addFlashAttribute("successMessage", "Demande ajoutée avec succès !");
             return new ModelAndView("redirect:/demandes/liste");
@@ -221,26 +218,25 @@ public class DemandeController {
         return modelAndView;
     }
     
-    // Page qui affiche tous les statuts des demandes
     @GetMapping("/statuts")
-    public ModelAndView listeStatutsDemandes() {
-        List<Demande> demandes = demandeService.getAllDemandes();
-        
-        ModelAndView modelAndView = new ModelAndView("demandes/statuts");
-        modelAndView.addObject("demandes", demandes);
-        modelAndView.addObject("titre", "Gestion des statuts des demandes");
-        modelAndView.addObject("sousTitre", "Suivi et modification des statuts");
-        
-        // Récupérer le statut actuel pour chaque demande
-        for (Demande demande : demandes) {
-            DemandeStatus statutActuel = demandeStatusService.getLatestStatusByDemandeId(demande.getIdDemande()).orElse(null);
-            modelAndView.addObject("statut_" + demande.getIdDemande(), statutActuel);
-        }
-        
-        return modelAndView;
+public ModelAndView listeStatutsDemandes() {
+    List<Demande> demandes = demandeService.getAllDemandes();
+    List<Status> statusList = statusService.getAllStatus(); // Ajoutez cette ligne
+    
+    ModelAndView modelAndView = new ModelAndView("demandes/statuts");
+    modelAndView.addObject("demandes", demandes);
+    modelAndView.addObject("statusList", statusList); // Ajoutez cette ligne
+    modelAndView.addObject("titre", "Gestion des statuts des demandes");
+    modelAndView.addObject("sousTitre", "Suivi et modification des statuts");
+    
+    for (Demande demande : demandes) {
+        DemandeStatus statutActuel = demandeStatusService.getLatestStatusByDemandeId(demande.getIdDemande()).orElse(null);
+        modelAndView.addObject("statut_" + demande.getIdDemande(), statutActuel);
     }
     
-    // Page d'historique des statuts d'une demande
+    return modelAndView;
+}
+    
     @GetMapping("/historique-statuts/{id}")
     public ModelAndView historiqueStatuts(@PathVariable Long id) {
         Demande demande = demandeService.getDemandeById(id).orElse(null);
@@ -259,7 +255,6 @@ public class DemandeController {
         return modelAndView;
     }
     
-    // Page pour changer le statut d'une demande
     @GetMapping("/changer-statut/{id}")
     public ModelAndView showChangeStatusForm(@PathVariable Long id) {
         Demande demande = demandeService.getDemandeById(id).orElse(null);
@@ -277,7 +272,6 @@ public class DemandeController {
         return modelAndView;
     }
     
-    // Action pour changer le statut
     @PostMapping("/changer-statut/{id}")
     public ModelAndView changeStatus(@PathVariable Long id,
                                     @RequestParam Long statusId,
@@ -293,7 +287,6 @@ public class DemandeController {
         return new ModelAndView("redirect:/demandes/statuts");
     }
     
-    // Ajouter un statut directement depuis la page de liste
     @PostMapping("/ajouter-statut")
     public ModelAndView ajouterStatut(@RequestParam Long demandeId,
                                      @RequestParam Long statusId,

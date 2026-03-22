@@ -19,7 +19,6 @@ public interface DemandeStatusRepository extends JpaRepository<DemandeStatus, Lo
     @Query("SELECT ds FROM DemandeStatus ds WHERE ds.demande.idDemande = :demandeId ORDER BY ds.date DESC")
     List<DemandeStatus> findByDemandeIdOrderByDateDesc(@Param("demandeId") Long demandeId);
     
-    // Correction: Trier par date puis par ID pour avoir un résultat unique
     @Query("SELECT ds FROM DemandeStatus ds WHERE ds.demande.idDemande = :demandeId ORDER BY ds.date DESC, ds.idDemandeStatus DESC LIMIT 1")
     Optional<DemandeStatus> findLatestStatusByDemandeId(@Param("demandeId") Long demandeId);
     

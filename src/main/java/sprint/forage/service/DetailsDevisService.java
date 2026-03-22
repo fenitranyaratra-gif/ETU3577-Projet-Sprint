@@ -21,7 +21,6 @@ public class DetailsDevisService {
     @Autowired
     private DevisRepository devisRepository;
     
-    // Create
     public DetailsDevis createDetailsDevis(DetailsDevis detailsDevis, Long devisId) {
         Devis devis = devisRepository.findById(devisId)
             .orElseThrow(() -> new RuntimeException("Devis non trouvé avec l'id: " + devisId));
@@ -34,7 +33,6 @@ public class DetailsDevisService {
         return detailsDevisRepository.save(detailsDevis);
     }
     
-    // Create multiple details
     public List<DetailsDevis> createMultipleDetailsDevis(List<DetailsDevis> detailsDevisList, Long devisId) {
         Devis devis = devisRepository.findById(devisId)
             .orElseThrow(() -> new RuntimeException("Devis non trouvé avec l'id: " + devisId));
@@ -49,22 +47,18 @@ public class DetailsDevisService {
         return detailsDevisRepository.saveAll(detailsDevisList);
     }
     
-    // Read - All
     public List<DetailsDevis> getAllDetailsDevis() {
         return detailsDevisRepository.findAll();
     }
     
-    // Read - By ID
     public Optional<DetailsDevis> getDetailsDevisById(Long id) {
         return detailsDevisRepository.findById(id);
     }
     
-    // Read - By devis ID
     public List<DetailsDevis> getDetailsDevisByDevisId(Long devisId) {
         return detailsDevisRepository.findByDevisIdDevis(devisId);
     }
     
-    // Update
     public DetailsDevis updateDetailsDevis(Long id, DetailsDevis detailsDevisDetails) {
         DetailsDevis detailsDevis = detailsDevisRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Détail devis non trouvé avec l'id: " + id));
@@ -79,7 +73,6 @@ public class DetailsDevisService {
         return detailsDevisRepository.save(detailsDevis);
     }
     
-    // Delete
     public void deleteDetailsDevis(Long id) {
         DetailsDevis detailsDevis = detailsDevisRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Détail devis non trouvé avec l'id: " + id));
@@ -87,14 +80,12 @@ public class DetailsDevisService {
         detailsDevisRepository.delete(detailsDevis);
     }
     
-    // Delete all details by devis ID
     public void deleteDetailsDevisByDevisId(Long devisId) {
         if (detailsDevisRepository.existsByDevisIdDevis(devisId)) {
             detailsDevisRepository.deleteByDevisId(devisId);
         }
     }
     
-    // Get total amount by devis ID
     public BigDecimal getTotalMontantByDevisId(Long devisId) {
         return detailsDevisRepository.sumMontantByDevisId(devisId);
     }

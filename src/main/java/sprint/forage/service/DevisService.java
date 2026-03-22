@@ -38,9 +38,7 @@ public class DevisService {
         @Autowired
     private DemandeStatusRepository demandeStatusRepository;
     
-    // Create
-     // Create
-    // Create
+
     public Devis createDevis(Devis devis, Long demandeId, Long typeDevisId) {
         logger.info("=== CREATION DEVIS ===");
         logger.info("DemandeId: {}", demandeId);
@@ -56,14 +54,11 @@ public class DevisService {
         devis.setTypeDevis(typeDevis);
         devis.setDate(LocalDate.now());
         
-        // Sauvegarder le devis
         Devis savedDevis = devisRepository.save(devis);
         logger.info("Devis sauvegardé avec ID: {}", savedDevis.getIdDevis());
         
-        // Méthode 1: Utiliser l'ID directement (recommandé)
-        Long devisEnvoyeStatusId = 9L; // ID du statut "Devis envoyé" dans votre base
+        Long devisEnvoyeStatusId = 9L; // "Devis envoyé" 
         
-        // Vérifier si le statut existe
         Status devisEnvoyeStatus = statusRepository.findById(devisEnvoyeStatusId)
             .orElseThrow(() -> new RuntimeException(
                 "Statut avec ID " + devisEnvoyeStatusId + " non trouvé. " +
@@ -72,17 +67,14 @@ public class DevisService {
         
         logger.info("Statut 'Devis envoyé' trouvé avec ID: {}", devisEnvoyeStatus.getIdStatus());
         
-        // Créer un nouveau DemandeStatus
         DemandeStatus demandeStatus = new DemandeStatus();
         demandeStatus.setDemande(demande);
         demandeStatus.setStatus(devisEnvoyeStatus);
         demandeStatus.setDate(LocalDate.now());
         
-        // Sauvegarder le nouveau statut
         DemandeStatus savedDemandeStatus = demandeStatusRepository.save(demandeStatus);
         logger.info("Nouveau statut ajouté pour la demande {}: {}", demandeId, devisEnvoyeStatus.getLibelle());
         
-        // Mettre à jour la liste des statuts de la demande
         if (demande.getDemandeStatuses() == null) {
             demande.setDemandeStatuses(new ArrayList<>());
         }
@@ -91,42 +83,34 @@ public class DevisService {
         return savedDevis;
     }
     
-    // Read - All
     public List<Devis> getAllDevis() {
         return devisRepository.findAll();
     }
     
-    // Read - By ID
     public Optional<Devis> getDevisById(Long id) {
         return devisRepository.findById(id);
     }
     
-    // Read - By ID with details
     public Optional<Devis> getDevisByIdWithDetails(Long id) {
         return devisRepository.findByIdWithDetails(id);
     }
     
-    // Read - By demande ID
     public List<Devis> getDevisByDemandeId(Long demandeId) {
         return devisRepository.findByDemandeIdDemande(demandeId);
     }
     
-    // Read - By type devis ID
     public List<Devis> getDevisByTypeDevisId(Long typeDevisId) {
         return devisRepository.findByTypeDevisIdTypeDevis(typeDevisId);
     }
     
-    // Read - By date range
     public List<Devis> getDevisByDateRange(LocalDate startDate, LocalDate endDate) {
         return devisRepository.findByDateBetween(startDate, endDate);
     }
     
-    // Read - By client ID
     public List<Devis> getDevisByClientId(Long clientId) {
         return devisRepository.findByClientId(clientId);
     }
     
-    // Update
     public Devis updateDevis(Long id, Devis devisDetails) {
         Devis devis = devisRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Devis non trouvé avec l'id: " + id));
@@ -137,12 +121,10 @@ public class DevisService {
         return devisRepository.save(devis);
     }
     
-    // Delete
     public void deleteDevis(Long id) {
         Devis devis = devisRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Devis non trouvé avec l'id: " + id));
         
-        // Vérifier si le devis a des détails
         if (devis.getDetailsDevis() != null && !devis.getDetailsDevis().isEmpty()) {
             throw new RuntimeException("Impossible de supprimer un devis qui a des détails");
         }
@@ -150,7 +132,6 @@ public class DevisService {
         devisRepository.delete(devis);
     }
     
-    // Calculer le montant total du devis
     public BigDecimal getMontantTotalDevis(Long devisId) {
         return devisRepository.findByIdWithDetails(devisId)
             .map(devis -> devis.getDetailsDevis().stream()
@@ -159,7 +140,6 @@ public class DevisService {
             .orElse(BigDecimal.ZERO);
     }
     
-    // Statistiques
     public Double getAverageDevisAmount() {
         return devisRepository.getAverageDevisAmount();
     }

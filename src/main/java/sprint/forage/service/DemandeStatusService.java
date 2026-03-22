@@ -26,7 +26,6 @@ public class DemandeStatusService {
     @Autowired
     private StatusRepository statusRepository;
     
-    // Create
     public DemandeStatus createDemandeStatus(DemandeStatus demandeStatus, Long demandeId, Long statusId) {
         Demande demande = demandeRepository.findById(demandeId)
             .orElseThrow(() -> new RuntimeException("Demande non trouvée avec l'id: " + demandeId));
@@ -41,42 +40,34 @@ public class DemandeStatusService {
         return demandeStatusRepository.save(demandeStatus);
     }
     
-    // Read - All
     public List<DemandeStatus> getAllDemandeStatus() {
         return demandeStatusRepository.findAll();
     }
     
-    // Read - By ID
     public Optional<DemandeStatus> getDemandeStatusById(Long id) {
         return demandeStatusRepository.findById(id);
     }
     
-    // Read - By demande ID (ordered by date desc)
     public List<DemandeStatus> getDemandeStatusByDemandeId(Long demandeId) {
         return demandeStatusRepository.findByDemandeIdOrderByDateDesc(demandeId);
     }
     
-    // Read - Latest status by demande ID
     public Optional<DemandeStatus> getLatestStatusByDemandeId(Long demandeId) {
         return demandeStatusRepository.findLatestStatusByDemandeId(demandeId);
     }
     
-    // Read - By status ID
     public List<DemandeStatus> getDemandeStatusByStatusId(Long statusId) {
         return demandeStatusRepository.findByStatusIdStatus(statusId);
     }
     
-    // Read - By date range
     public List<DemandeStatus> getDemandeStatusByDateRange(LocalDate startDate, LocalDate endDate) {
         return demandeStatusRepository.findByDateBetween(startDate, endDate);
     }
     
-    // Update (on ne modifie généralement pas un statut existant, on en ajoute un nouveau)
     public DemandeStatus updateDemandeStatus(Long id, DemandeStatus demandeStatusDetails) {
         throw new UnsupportedOperationException("La mise à jour d'un statut n'est pas autorisée. Utilisez plutôt la création d'un nouveau statut.");
     }
     
-    // Delete
     public void deleteDemandeStatus(Long id) {
         DemandeStatus demandeStatus = demandeStatusRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Statut de demande non trouvé avec l'id: " + id));
@@ -84,7 +75,6 @@ public class DemandeStatusService {
         demandeStatusRepository.delete(demandeStatus);
     }
     
-    // Change status for a demande
     public DemandeStatus changeDemandeStatus(Long demandeId, Long newStatusId) {
         Demande demande = demandeRepository.findById(demandeId)
             .orElseThrow(() -> new RuntimeException("Demande non trouvée avec l'id: " + demandeId));
@@ -98,7 +88,6 @@ public class DemandeStatusService {
         return demandeStatusRepository.save(demandeStatus);
     }
     
-    // Statistiques
     public long countByStatusAndDate(Long statusId, LocalDate date) {
         return demandeStatusRepository.countByStatusAndDate(statusId, date);
     }

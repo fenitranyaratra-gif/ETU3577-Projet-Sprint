@@ -64,15 +64,8 @@ public class DemandeController {
                                   @RequestParam(value = "adresse", required = false) String adresse,
                                   @RequestParam(value = "district", required = false) String district,
                                   RedirectAttributes redirectAttributes) {
+
         
-        // Log pour déboguer
-        logger.info("=== AJOUT DEMANDE ===");
-        logger.info("clientId: {}", clientId);
-        logger.info("lieu: {}", lieu);
-        logger.info("adresse: {}", adresse);
-        logger.info("district: {}", district);
-        
-        // Validation du client
         if (clientId == null) {
             logger.error("clientId est null");
             ModelAndView modelAndView = new ModelAndView("demandes/ajouter");
@@ -82,7 +75,6 @@ public class DemandeController {
             return modelAndView;
         }
         
-        // Validation du lieu
         if (lieu == null || lieu.trim().isEmpty()) {
             logger.error("lieu est null ou vide");
             ModelAndView modelAndView = new ModelAndView("demandes/ajouter");
@@ -221,11 +213,11 @@ public class DemandeController {
     @GetMapping("/statuts")
 public ModelAndView listeStatutsDemandes() {
     List<Demande> demandes = demandeService.getAllDemandes();
-    List<Status> statusList = statusService.getAllStatus(); // Ajoutez cette ligne
+    List<Status> statusList = statusService.getAllStatus(); 
     
     ModelAndView modelAndView = new ModelAndView("demandes/statuts");
     modelAndView.addObject("demandes", demandes);
-    modelAndView.addObject("statusList", statusList); // Ajoutez cette ligne
+    modelAndView.addObject("statusList", statusList); 
     modelAndView.addObject("titre", "Gestion des statuts des demandes");
     modelAndView.addObject("sousTitre", "Suivi et modification des statuts");
     

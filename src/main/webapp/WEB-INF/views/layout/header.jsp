@@ -121,22 +121,28 @@
         <div class="sidebar-brand">
             <i class="bi bi-intersect"></i> ETU3577
         </div>
-        <ul class="nav-list">
-            <li class="nav-item">
-                <a class="nav-link" href="${pageContext.request.contextPath}/candidats/liste"><i class="bi bi-people"></i> Candidats</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="${pageContext.request.contextPath}/parametres/liste"><i class="bi bi-gear"></i> Paramètres</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="${pageContext.request.contextPath}/notes/liste"><i class="bi bi-journal-text"></i> Notes</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="${pageContext.request.contextPath}/notefinale/rechercher"><i class="bi bi-graph-up-arrow"></i> Calculer Note Finale</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="${pageContext.request.contextPath}/notefinale/liste"><i class="bi bi-graph-up-arrow"></i> Liste Note Finale</a>
-            </li>
-        </ul>
+        <ul class="navbar-nav">
+    <li class="nav-item">
+        <a class="nav-link" href="/">Dashboard</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/clients/liste">Clients</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/demandes/liste">Demandes</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/demandes/statuts">Statuts des demandes</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/devis/liste">Devis</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/types-devis/liste">Types Devis</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="/status/liste">Statuts</a>
+    </li>
+</ul>
     </div>
     <div class="main-content">

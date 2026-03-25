@@ -26,7 +26,6 @@
             margin: 0;
         }
 
-        /* Sidebar Style */
         .sidebar {
             width: 260px;
             background-color: var(--sidebar-bg);
@@ -78,14 +77,12 @@
             background-color: var(--accent-color);
         }
 
-        /* Main Content Adjustment */
         .main-content {
             margin-left: 260px;
             width: calc(100% - 260px);
             padding: 3rem;
         }
 
-        /* Card Modernization */
         .card {
             border: none;
             border-radius: 24px;
@@ -114,6 +111,17 @@
             padding: 0.75rem 1.5rem;
             font-weight: 600;
         }
+        
+        .nav-link i {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+        
+        .nav-link:hover i {
+            transform: translateX(3px);
+        }
     </style>
 </head>
 <body>
@@ -123,20 +131,16 @@
         </div>
         <ul class="nav-list">
             <li class="nav-item">
-                <a class="nav-link" href="${pageContext.request.contextPath}/candidats/liste"><i class="bi bi-people"></i> Candidats</a>
+                <a class="nav-link" href="/clients/liste">
+                    <i class="bi bi-people"></i> Clients
+                </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="${pageContext.request.contextPath}/parametres/liste"><i class="bi bi-gear"></i> Paramètres</a>
+                <a class="nav-link" href="/demandes/liste">
+                    <i class="bi bi-file-text"></i> Demandes
+                </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="${pageContext.request.contextPath}/notes/liste"><i class="bi bi-journal-text"></i> Notes</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="${pageContext.request.contextPath}/notefinale/rechercher"><i class="bi bi-graph-up-arrow"></i> Calculer Note Finale</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="${pageContext.request.contextPath}/notefinale/liste"><i class="bi bi-graph-up-arrow"></i> Liste Note Finale</a>
-            </li>
+            
         </ul>
     </div>
     <div class="main-content">

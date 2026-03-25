@@ -114,6 +114,18 @@
             padding: 0.75rem 1.5rem;
             font-weight: 600;
         }
+        
+        /* Icône styling amélioré */
+        .nav-link i {
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+        
+        .nav-link:hover i {
+            transform: translateX(3px);
+        }
     </style>
 </head>
 <body>
@@ -123,19 +135,29 @@
         </div>
         <ul class="nav-list">
             <li class="nav-item">
-                <a class="nav-link" href="${pageContext.request.contextPath}/candidats/liste"><i class="bi bi-people"></i> Candidats</a>
+                <a class="nav-link" href="/clients/liste">
+                    <i class="bi bi-people"></i> Clients
+                </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="${pageContext.request.contextPath}/parametres/liste"><i class="bi bi-gear"></i> Paramètres</a>
+                <a class="nav-link" href="/demandes/liste">
+                    <i class="bi bi-file-text"></i> Demandes
+                </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="${pageContext.request.contextPath}/notes/liste"><i class="bi bi-journal-text"></i> Notes</a>
+                <a class="nav-link" href="/demandes/statuts">
+                    <i class="bi bi-pie-chart"></i> Statuts des demandes
+                </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="${pageContext.request.contextPath}/notefinale/rechercher"><i class="bi bi-graph-up-arrow"></i> Calculer Note Finale</a>
+                <a class="nav-link" href="/devis/liste">
+                    <i class="bi bi-receipt"></i> Devis
+                </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="${pageContext.request.contextPath}/notefinale/liste"><i class="bi bi-graph-up-arrow"></i> Liste Note Finale</a>
+                <a class="nav-link" href="/status/liste">
+                    <i class="bi bi-toggle-on"></i> Statuts
+                </a>
             </li>
         </ul>
     </div>

@@ -1,1 +1,37 @@
-wwwiiiii
+Table :
+Demande (
+    idClient,
+    lieu,
+    adresse,
+    district,
+    date
+)
+Client(
+    nom,
+    contact
+)
+TypeDevis(
+    idTypeDevis,
+    libelle
+)
+Devis(
+    idDevis
+    idTypeDevis,
+    date,
+    idDemande
+)
+DetailsDevis(
+    idDevis,
+    libelle,
+    montant
+)
+Status(
+    idStatus,
+    libelle,
+)
+DemandeStatus(
+    idDemandeStatus,
+    idDemande,
+    idStatus,
+    Date
+)

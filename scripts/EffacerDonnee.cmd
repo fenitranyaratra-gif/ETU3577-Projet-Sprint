@@ -1,20 +1,22 @@
 @echo off
+:: Configuration des variables d'environnement
 SET PGUSER=postgres
-SET PGDATABASE=notecorrection
+SET PGDATABASE=forage
 SET PGHOST=localhost
 SET PGPORT=5432
 
-echo Fafana %PGDATABASE%...
+echo Tentative de réinitialisation de la base de données : %PGDATABASE%...
 
-:: Utilisation de TRUNCATE avec CASCADE pour vider toutes les tables en ignorant les contraintes d'ordre
-psql -c "TRUNCATE TABLE note_finale, Note, Parametre, Correcteur, Resolution, Candidat, Operateur, Matiere RESTART IDENTITY CASCADE;"
+:: Utilisation de TRUNCATE avec CASCADE et RESTART IDENTITY
+:: L'ordre importe peu avec CASCADE, mais voici toutes tes tables :
+psql -c "TRUNCATE TABLE DetailsDevis, Devis, DemandeStatus, Status, Demande, TypeDevis, Client RESTART IDENTITY CASCADE;"
 
 if %ERRORLEVEL% EQU 0 (
     echo.
-    echo Mety
+    echo Operation reussie : Les tables sont vides et les compteurs sequences sont a zero.
 ) else (
     echo.
-    echo Misy erreur
+    echo Une erreur est survenue lors de la suppression des donnees.
 )
 
 pause
